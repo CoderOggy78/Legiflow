@@ -59,7 +59,7 @@ export default function DashboardPage() {
                         </SelectContent>
                     </Select>
 
-                    <Select value={selectedStatus} onValueChange={(val: any) => setSelectedStatus(val)}>
+                    <Select value={selectedStatus} onValueChange={(val: string) => setSelectedStatus(val as CaseStatus | 'All')}>
                         <SelectTrigger className="w-[140px] h-9">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>

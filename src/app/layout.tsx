@@ -13,6 +13,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { LoaderCircle } from 'lucide-react';
+import { SmartAssistant } from '@/components/legiflow/smart-assistant';
 
 const navItems = [
     { href: '/dashboard', icon: Home, label: 'Home' },
@@ -90,7 +91,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     }
   
     return (
-        <div className="min-h-screen flex text-foreground">
+        <div className="min-h-screen flex text-foreground relative">
             <AppHeader />
             <div className="flex mt-16 h-[calc(100vh-4rem)] w-full">
                 <aside className="w-64 flex-col fixed h-full p-3 bg-gradient-to-b from-card/60 to-card/20 border-r border-border/50">
@@ -120,6 +121,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                     {children}
                 </main>
             </div>
+            <SmartAssistant />
         </div>
     );
 }
@@ -144,3 +146,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </html>
     );
 }
+

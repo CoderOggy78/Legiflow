@@ -1,84 +1,102 @@
 
 'use client';
 
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart";
-
-const riskData = [
-  { name: 'Docs', Risks: 4 },
-  { name: 'Clauses', Risks: 12 },
-];
-
-const chartConfig = {
-  risks: {
-    label: "Risks",
-    color: "hsl(var(--accent))",
-  },
-} satisfies ChartConfig;
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles } from "lucide-react";
+import { mockDashboardCases, getStats, getCasesPerMonth, getStatusDistribution, CaseType, CaseStatus } from "@/lib/dashboard-data";
+import { DashboardStats } from "@/components/legiflow/dashboard-stats";
+import { CasesPerMonthChart, CaseStatusChart } from "@/components/legiflow/dashboard-charts";
+import { CaseTimeline } from "@/components/legiflow/case-timeline";
 
 export default function DashboardPage() {
+    const [selectedType, setSelectedType] = useState<CaseType | 'All'>('All');
+    const [selectedStatus, setSelectedStatus] = useState<CaseStatus | 'All'>('All');
+
+    // Filter pipeline
+    const filteredCases = useMemo(() => {
+        let cases = mockDashboardCases;
+        if (selectedType !== 'All') cases = cases.filter(c => c.type === selectedType);
+        if (selectedStatus !== 'All') cases = cases.filter(c => c.status === selectedStatus);
+        return cases;
+    }, [selectedType, selectedStatus]);
+
+    // Data Aggregation
+    const stats = useMemo(() => getStats(filteredCases), [filteredCases]);
+    const monthlyData = useMemo(() => getCasesPerMonth(filteredCases), [filteredCases]);
+    const distributionData = useMemo(() => getStatusDistribution(filteredCases), [filteredCases]);
+
+    // Generate a simple Smart Insight
+    const insightText = useMemo(() => {
+        if (filteredCases.length === 0) return "No data available for the current filters.";
+        if (stats.pending > 0) return `You currently have ${stats.pending} pending cases requiring attention.`;
+        if (stats.open > 0) return `You have ${stats.open} active cases progressing normally.`;
+        return `All filtered cases are closed. Great job!`;
+    }, [stats, filteredCases]);
+
     return (
         <div className="space-y-6">
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-                <CardHeader>
-                    <CardTitle className="text-3xl font-bold">Welcome to LegiFlow</CardTitle>
-                    <CardDescription className="text-lg text-muted-foreground">AI-driven legal simplifier — paste/upload documents, detect risky clauses, and understand laws & IPC quickly.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                   <div className="flex gap-4">
-                     <Link href="/analyze">
-                        <Button>Upload Document</Button>
-                     </Link>
-                     <Link href="/samples">
-                        <Button variant="ghost">View Samples</Button>
-                     </Link>
-                   </div>
-                </CardContent>
-            </Card>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h2>
+                    <p className="text-muted-foreground mt-1">Real-time insights and progression tracking for your cases.</p>
+                </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Quick Stats</CardTitle>
-                        <CardDescription>A brief overview of your activity.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                         <ChartContainer config={chartConfig} className="min-h-52 w-full">
-                            <BarChart accessibilityLayer data={riskData}>
-                                <CartesianGrid vertical={false} />
-                                <XAxis
-                                    dataKey="name"
-                                    tickLine={false}
-                                    tickMargin={10}
-                                    axisLine={false}
-                                />
-                                <YAxis />
-                                <ChartTooltip 
-                                    cursor={false} 
-                                    content={<ChartTooltipContent />} 
-                                />
-                                <Bar dataKey="Risks" fill="var(--color-risks)" radius={4} />
-                            </BarChart>
-                        </ChartContainer>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Recent Activity</CardTitle>
-                        <CardDescription>Your latest analyzed documents.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                         <div className="text-center text-muted-foreground py-10">
-                            <p>No recent activity.</p>
-                         </div>
-                    </CardContent>
-                </Card>
+                {/* Filters */}
+                <div className="flex flex-wrap items-center gap-3 bg-card p-2 rounded-lg border shadow-sm">
+                    <Select value={selectedType} onValueChange={(val: string) => setSelectedType(val as CaseType | 'All')}>
+                        <SelectTrigger className="w-[160px] h-9">
+                            <SelectValue placeholder="Case Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="All">All Types</SelectItem>
+                            <SelectItem value="Corporate">Corporate</SelectItem>
+                            <SelectItem value="Civil">Civil</SelectItem>
+                            <SelectItem value="Intellectual Property">Intellectual Property</SelectItem>
+                            <SelectItem value="Employment">Employment</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={selectedStatus} onValueChange={(val: string) => setSelectedStatus(val as CaseStatus | 'All')}>
+                        <SelectTrigger className="w-[140px] h-9">
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="All">All Statuses</SelectItem>
+                            <SelectItem value="Open">Open</SelectItem>
+                            <SelectItem value="Pending">Pending</SelectItem>
+                            <SelectItem value="Closed">Closed</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            {/* Smart Insight Banner */}
+            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-xl p-4 flex items-center gap-3">
+                <div className="bg-primary/20 p-2 rounded-full hidden sm:block">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                    <h4 className="font-semibold text-sm">Smart Insight</h4>
+                    <p className="text-sm text-muted-foreground">{insightText}</p>
+                </div>
+            </div>
+
+            {/* Statistics */}
+            <DashboardStats total={stats.total} open={stats.open} closed={stats.closed} pending={stats.pending} />
+
+            {/* Charts Grid */}
+            <div className="grid lg:grid-cols-3 gap-6">
+                <CasesPerMonthChart data={monthlyData} />
+                <CaseStatusChart data={distributionData} />
+            </div>
+
+            {/* Timelines */}
+            <div className="grid grid-cols-1">
+                <CaseTimeline cases={filteredCases} />
             </div>
         </div>
     );
 }
-

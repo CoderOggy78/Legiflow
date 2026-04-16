@@ -46,7 +46,7 @@ export default function DashboardPage() {
 
                 {/* Filters */}
                 <div className="flex flex-wrap items-center gap-3 bg-card p-2 rounded-lg border shadow-sm">
-                    <Select value={selectedType} onValueChange={(val: any) => setSelectedType(val)}>
+                    <Select value={selectedType} onValueChange={(val: string) => setSelectedType(val as CaseType | 'All')}>
                         <SelectTrigger className="w-[160px] h-9">
                             <SelectValue placeholder="Case Type" />
                         </SelectTrigger>

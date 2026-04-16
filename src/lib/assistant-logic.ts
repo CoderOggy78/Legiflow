@@ -87,7 +87,7 @@ export async function processQuery(query: string, history: ChatMessage[]): Promi
   // Context awareness fallback (super basic)
   if (lowerQuery.includes("show details") || lowerQuery.includes("more info")) {
     if (history.length > 0) {
-      const lastBotMsg = history.reverse().find(m => m.role === 'assistant');
+      const lastBotMsg = [...history].reverse().find(m => m.role === 'assistant');
       if (lastBotMsg && (lastBotMsg.content.includes("TechCorp") || lastBotMsg.content.includes("Pending"))) {
          return "The case **Smith vs. TechCorp (NDA Breach)** involves a potential breach of confidentiality. The next hearing requires the submission of primary evidence documents. Do you want to view the files?";
       }

@@ -7,10 +7,8 @@
  * - AnswerContractQuestionInput - The input type for the answerContractQuestion function.
  * - AnswerContractQuestionOutput - The return type for the answerContractQuestion function.
  */
-
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
 const AnswerContractQuestionInputSchema = z.object({
   contractText: z
     .string()
@@ -41,13 +39,11 @@ const AnswerContractQuestionOutputSchema = z.object({
 export type AnswerContractQuestionOutput = z.infer<
   typeof AnswerContractQuestionOutputSchema
 >;
-
 export async function answerContractQuestion(
   input: AnswerContractQuestionInput
 ): Promise<AnswerContractQuestionOutput> {
   return answerContractQuestionFlow(input);
 }
-
 const answerContractQuestionPrompt = ai.definePrompt({
   name: 'answerContractQuestionPrompt',
   input: {schema: AnswerContractQuestionInputSchema},
@@ -66,7 +62,6 @@ const answerContractQuestionPrompt = ai.definePrompt({
   Answer:
   `,
 });
-
 const answerContractQuestionFlow = ai.defineFlow(
   {
     name: 'answerContractQuestionFlow',

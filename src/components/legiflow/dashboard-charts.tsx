@@ -65,7 +65,7 @@ interface CasesPerMonthChartProps {
 }
 
 export function CasesPerMonthChart({ data }: CasesPerMonthChartProps) {
-  const peak = useMemo(() => Math.max(...data.map((d) => d.cases)), [data]);
+  const peak = useMemo(() => (data.length > 0 ? Math.max(...data.map((d) => d.cases)) : 0), [data]);
 
   return (
     <Card className="col-span-1 lg:col-span-2 bg-[#13131f] border border-white/[0.06] overflow-hidden">
